@@ -15,7 +15,8 @@ class ViewController: UIViewController {
     
     @IBOutlet var sceneView: ARSKView!
     
-    let locationManager = CLLocationManager()
+    var locationManager: CLLocationManager!
+    var myScene: Scene!
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -29,12 +30,17 @@ class ViewController: UIViewController {
         // Load the SKScene from 'Scene.sks'
         if let scene = SKScene(fileNamed: "Scene") {
             sceneView.presentScene(scene)
+            
+            if let s = scene as? Scene {
+                myScene = s
+            }
         }
         
         // Location manager
+        locationManager = CLLocationManager()
         locationManager.delegate = self;
         locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestAlwaysAuthorization()
+        locationManager.requestWhenInUseAuthorization()
         locationManager.startUpdatingLocation()
     }
     
@@ -64,7 +70,14 @@ class ViewController: UIViewController {
 extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let locValue:CLLocationCoordinate2D = manager.location!.coordinate
-        print("locations = \(locValue.latitude) \(locValue.longitude)")
+        myScene.updateLocation(withLocation: locValue)
+        //print("spherical location = \(locValue.latitude) \(locValue.longitude)")
+        //print("cartesian location = \(locValue.convertSphericalToCartesian())")
+        //locationManager.stopUpdatingLocation()
+    }
+    
+    func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
+        print(error)
     }
 }
 
@@ -93,5 +106,26 @@ extension ViewController: ARSKViewDelegate {
     func sessionInterruptionEnded(_ session: ARSession) {
         // Reset tracking and/or remove existing anchors if consistent tracking is required
         
+    }
+}
+
+extension Int {
+    var degreesToRadians: Double { return Double(self) * .pi / 180 }
+}
+
+extension FloatingPoint {
+    var degreesToRadians: Self { return self * .pi / 180 }
+    var radiansToDegrees: Self { return self * 180 / .pi }
+}
+
+extension CLLocationCoordinate2D {
+    func convertSphericalToCartesian() -> (Double, Double, Double) {
+        let earthRadius = 6367.0; //radius in km
+        let lt = self.latitude.degreesToRadians
+        let ln = self.longitude.degreesToRadians
+        let x = earthRadius * cos(lt) * cos(ln)
+        let y = earthRadius * cos(lt) * sin(ln)
+        let z = earthRadius * sin(lt)
+        return (x, y, z)
     }
 }

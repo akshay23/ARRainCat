@@ -12,19 +12,21 @@ import CoreLocation
 
 class Scene: SKScene {
     
-    let locationManager = CLLocationManager()
-    
     private var lastUpdateTime : TimeInterval = 0
     private var currentAnimotoSpawnRate : TimeInterval = 0
     private var animotoSpawnRate : TimeInterval = 2.0
+    private var myLabel: SKLabelNode!
+    private var currentLoc: CLLocationCoordinate2D?
     
     override func didMove(to view: SKView) {
         // Setup your scene here
-        self.lastUpdateTime = 0
-        locationManager.delegate = self;
-        locationManager.desiredAccuracy = kCLLocationAccuracyBest
-        locationManager.requestAlwaysAuthorization()
-        locationManager.startUpdatingLocation()
+        lastUpdateTime = 0
+        
+        myLabel = SKLabelNode(fontNamed: "Arial")
+        myLabel.text = ""
+        myLabel.fontSize = 15
+        myLabel.position = CGPoint(x: 0, y: size.height - 250)
+        addChild(myLabel)
     }
     
     override func update(_ currentTime: TimeInterval) {
@@ -44,10 +46,15 @@ class Scene: SKScene {
         if currentAnimotoSpawnRate > animotoSpawnRate {
             currentAnimotoSpawnRate = 0
             animotoSpawnRate = Double(Float.random(lower: 2.0, 3.0))
-            spawnAnimoto()
+            //spawnAnimoto()
         }
         
         self.lastUpdateTime = currentTime
+        
+        // Update label
+        if let loc = currentLoc {
+            myLabel.text = String(describing: loc.convertSphericalToCartesian())
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -59,6 +66,10 @@ class Scene: SKScene {
             let node = nodes(at: touchLocation).first {
             node.removeFromParent()
         }
+    }
+    
+    func updateLocation(withLocation loc: CLLocationCoordinate2D) {
+        currentLoc = loc
     }
 }
 
@@ -77,7 +88,8 @@ private extension Scene {
             //translation.columns.3.w = -(Float.random(lower: 0.1, 0.4)) // distance behind camera
             //translation.columns.3.x = -(Float.random(lower: 0.1, 0.4)) // distance to the right of camera
             //translation.columns.2.y = -(Float.random(lower: 0.1, 0.5))
-            translation.columns.3.z = -(Float.random(lower: 0.1, 0.3)) // distance in front of camera
+            //translation.columns.3.z = -(Float.random(lower: 0.1, 0.3)) // distance in front of camera
+            translation.columns.3.z = -0.3
             let transform = simd_mul(currentFrame.camera.transform, translation)
             
             // Add a new anchor to the session
@@ -87,16 +99,8 @@ private extension Scene {
     }
 }
 
-extension Scene: CLLocationManagerDelegate {
-    func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
-        let locValue:CLLocationCoordinate2D = manager.location!.coordinate
-        print("locations = \(locValue.latitude) \(locValue.longitude)")
-    }
-}
-
-public extension Float {
-    /// SwiftRandom extension
-    public static func random(lower: Float = 0, _ upper: Float = 100) -> Float {
+extension Float {
+    static func random(lower: Float = 0, _ upper: Float = 100) -> Float {
         return (Float(arc4random()) / 0xFFFFFFFF) * (upper - lower) + lower
     }
 }
