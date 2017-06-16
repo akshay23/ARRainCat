@@ -71,9 +71,7 @@ extension ViewController: CLLocationManagerDelegate {
     func locationManager(_ manager: CLLocationManager, didUpdateLocations locations: [CLLocation]) {
         let locValue:CLLocationCoordinate2D = manager.location!.coordinate
         myScene.updateLocation(withLocation: locValue)
-        //print("spherical location = \(locValue.latitude) \(locValue.longitude)")
-        //print("cartesian location = \(locValue.convertSphericalToCartesian())")
-        //locationManager.stopUpdatingLocation()
+        locationManager.stopUpdatingLocation()
     }
     
     func locationManager(_ manager: CLLocationManager, didFailWithError error: Error) {
@@ -84,9 +82,14 @@ extension ViewController: CLLocationManagerDelegate {
 // MARK: - ARSKViewDelegate
 extension ViewController: ARSKViewDelegate {
     func view(_ view: ARSKView, nodeFor anchor: ARAnchor) -> SKNode? {
-        let animotoTexture = SKTexture(imageNamed: "animoto")
-        let animoto = SKSpriteNode(texture: animotoTexture)
-        return animoto;
+        // HACK
+        if let type = myScene.animotosDict[anchor.identifier] {
+            let animotoTexture = SKTexture(imageNamed: "animoto")
+            let animoto = SKSpriteNode(texture: animotoTexture)
+            animoto.name = type
+            return animoto;
+        }
+        return nil
     }
     
     func view(_ view: ARSKView, didRemove node: SKNode, for anchor: ARAnchor) {

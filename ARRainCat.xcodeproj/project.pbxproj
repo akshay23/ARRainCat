@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		19256A121EF43F370039F5A1 /* Locations.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19256A111EF43F370039F5A1 /* Locations.swift */; };
 		19ED1DFF1EF2F79900115737 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19ED1DFE1EF2F79900115737 /* AppDelegate.swift */; };
 		19ED1E011EF2F79900115737 /* Scene.sks in Resources */ = {isa = PBXBuildFile; fileRef = 19ED1E001EF2F79900115737 /* Scene.sks */; };
 		19ED1E031EF2F79900115737 /* Scene.swift in Sources */ = {isa = PBXBuildFile; fileRef = 19ED1E021EF2F79900115737 /* Scene.swift */; };
@@ -17,6 +18,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		19256A111EF43F370039F5A1 /* Locations.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Locations.swift; sourceTree = "<group>"; };
 		19ED1DFB1EF2F79900115737 /* ARRainCat.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ARRainCat.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		19ED1DFE1EF2F79900115737 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		19ED1E001EF2F79900115737 /* Scene.sks */ = {isa = PBXFileReference; lastKnownFileType = file.sks; path = Scene.sks; sourceTree = "<group>"; };
@@ -66,6 +68,7 @@
 				19ED1E091EF2F79900115737 /* Assets.xcassets */,
 				19ED1E0B1EF2F79900115737 /* LaunchScreen.storyboard */,
 				19ED1E0E1EF2F79900115737 /* Info.plist */,
+				19256A111EF43F370039F5A1 /* Locations.swift */,
 			);
 			path = ARRainCat;
 			sourceTree = "<group>";
@@ -144,6 +147,7 @@
 			files = (
 				19ED1E051EF2F79900115737 /* ViewController.swift in Sources */,
 				19ED1E031EF2F79900115737 /* Scene.swift in Sources */,
+				19256A121EF43F370039F5A1 /* Locations.swift in Sources */,
 				19ED1DFF1EF2F79900115737 /* AppDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

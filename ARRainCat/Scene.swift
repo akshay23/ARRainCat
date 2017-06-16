@@ -12,16 +12,15 @@ import CoreLocation
 
 class Scene: SKScene {
     
+    var animotosDict = [UUID: String]()
     private var lastUpdateTime : TimeInterval = 0
     private var currentAnimotoSpawnRate : TimeInterval = 0
-    private var animotoSpawnRate : TimeInterval = 2.0
+    private var animotoSpawnRate : TimeInterval = 4.0
     private var myLabel: SKLabelNode!
     private var currentLoc: CLLocationCoordinate2D?
     
     override func didMove(to view: SKView) {
         // Setup your scene here
-        lastUpdateTime = 0
-        
         myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.text = ""
         myLabel.fontSize = 15
@@ -43,29 +42,38 @@ class Scene: SKScene {
         // Update the Spawn Timer
         currentAnimotoSpawnRate += dt
         
-        if currentAnimotoSpawnRate > animotoSpawnRate {
+        if currentAnimotoSpawnRate > animotoSpawnRate, !animotosDict.values.contains("mydesk") {
             currentAnimotoSpawnRate = 0
             animotoSpawnRate = Double(Float.random(lower: 2.0, 3.0))
-            //spawnAnimoto()
+            spawnDesk(withLocation: myDeskLocation, name: "mydesk")
+        } else if currentAnimotoSpawnRate > animotoSpawnRate, !animotosDict.values.contains("aivensdesk") {
+            currentAnimotoSpawnRate = 0
+            animotoSpawnRate = Double(Float.random(lower: 2.0, 3.0))
+            spawnDesk(withLocation: AivensDeskLocation, name: "aivensdesk")
         }
         
         self.lastUpdateTime = currentTime
         
-        // Update label
-        if let loc = currentLoc {
-            myLabel.text = String(describing: loc.convertSphericalToCartesian())
-        }
+//        if let loc = currentLoc {
+//            print(loc.convertSphericalToCartesian())
+//            myLabel.text = String(describing: loc.convertSphericalToCartesian())
+//        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        guard let sceneView = self.view as? ARSKView else {
-            return
-        }
-        
-        if let touchLocation = touches.first?.location(in: sceneView),
-            let node = nodes(at: touchLocation).first {
-            node.removeFromParent()
-        }
+//        guard let sceneView = self.view as? ARSKView else {
+//            return
+//        }
+//
+//        if let touchLocation = touches.first?.location(in: sceneView),
+//            let node = nodes(at: touchLocation).first {
+//            node.removeFromParent()
+//
+//            // HACK
+//            if let name = node.name, name == "mydesk" {
+//                animotosDict = [UUID: String]()
+//            }
+//        }
     }
     
     func updateLocation(withLocation loc: CLLocationCoordinate2D) {
@@ -74,7 +82,7 @@ class Scene: SKScene {
 }
 
 private extension Scene {
-    func spawnAnimoto() {
+    func spawnDesk(withLocation location: (Double,Double,Double), name: String) {
         guard let sceneView = self.view as? ARSKView else {
             return
         }
@@ -82,19 +90,36 @@ private extension Scene {
         // Create anchor using the camera's current position
         if let currentFrame = sceneView.session.currentFrame {
             
-            // Create a transform with a random translation between
-            // 0.1 meters and 0.3 meters in front of the camera
+            // Create a transform with a translation that
+            // represents location of my desk
             var translation = matrix_identity_float4x4
-            //translation.columns.3.w = -(Float.random(lower: 0.1, 0.4)) // distance behind camera
-            //translation.columns.3.x = -(Float.random(lower: 0.1, 0.4)) // distance to the right of camera
-            //translation.columns.2.y = -(Float.random(lower: 0.1, 0.5))
-            //translation.columns.3.z = -(Float.random(lower: 0.1, 0.3)) // distance in front of camera
-            translation.columns.3.z = -0.3
+            let (xx , yy, zz) = currentLoc!.convertSphericalToCartesian()
+            let (mydeskx, mydesky, mydeskz) = location
+            
+            // Name
+            print("Name is \(name)")
+            
+            // Either to the right or left of camera
+            let xDiff = Float(mydeskx - xx) * 100
+            print("x is \(xDiff)")
+            translation.columns.3.x = xDiff
+            
+            // Either to the top or bottom of camera
+            let yDiff = Float(mydesky - yy) * 100
+            print("y is \(yDiff)")
+            translation.columns.3.y = yDiff
+            
+            // Either behind or in front of camera
+            let zDiff = Float(mydeskz - zz) * 100
+            print("z is \(zDiff)")
+            translation.columns.3.z = zDiff
+            
             let transform = simd_mul(currentFrame.camera.transform, translation)
             
             // Add a new anchor to the session
             let anchor = ARAnchor(transform: transform)
             sceneView.session.add(anchor: anchor)
+            animotosDict[anchor.identifier] = name
         }
     }
 }
