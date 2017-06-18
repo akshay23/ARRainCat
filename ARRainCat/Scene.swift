@@ -12,52 +12,43 @@ import CoreLocation
 
 class Scene: SKScene {
     
+    var viewController: ViewController!
     var animotosDict = [UUID: String]()
-    private var lastUpdateTime : TimeInterval = 0
-    private var currentAnimotoSpawnRate : TimeInterval = 0
-    private var animotoSpawnRate : TimeInterval = 4.0
+    
+    var currentLoc: CLLocationCoordinate2D? {
+        didSet {
+            for a in animotosDict {
+                animotosDict.removeValue(forKey: a.key)
+                viewController.nodesDict[a.key]?.removeFromParent()
+                viewController.nodesDict.removeValue(forKey: a.key)
+            }
+            print(currentLoc!)
+            myLabel.text = String(describing: currentLoc!.convertSphericalToCartesian())
+        }
+    }
+    
     private var myLabel: SKLabelNode!
-    private var currentLoc: CLLocationCoordinate2D?
     
     override func didMove(to view: SKView) {
         // Setup your scene here
         myLabel = SKLabelNode(fontNamed: "Arial")
         myLabel.text = ""
-        myLabel.fontSize = 15
+        myLabel.fontSize = 12
         myLabel.position = CGPoint(x: 0, y: size.height - 250)
         addChild(myLabel)
     }
     
     override func update(_ currentTime: TimeInterval) {
         // Called before each frame is rendered
-        
-        // Initialize _lastUpdateTime if it has not already been
-        if (self.lastUpdateTime == 0) {
-            self.lastUpdateTime = currentTime
-        }
-        
-        // Calculate time since last update
-        let dt = currentTime - self.lastUpdateTime
-        
-        // Update the Spawn Timer
-        currentAnimotoSpawnRate += dt
-        
-        if currentAnimotoSpawnRate > animotoSpawnRate, !animotosDict.values.contains("mydesk") {
-            currentAnimotoSpawnRate = 0
-            animotoSpawnRate = Double(Float.random(lower: 2.0, 3.0))
-            spawnDesk(withLocation: myDeskLocation, name: "mydesk")
-        } else if currentAnimotoSpawnRate > animotoSpawnRate, !animotosDict.values.contains("aivensdesk") {
-            currentAnimotoSpawnRate = 0
-            animotoSpawnRate = Double(Float.random(lower: 2.0, 3.0))
-            spawnDesk(withLocation: AivensDeskLocation, name: "aivensdesk")
-        }
-        
-        self.lastUpdateTime = currentTime
-        
-//        if let loc = currentLoc {
-//            print(loc.convertSphericalToCartesian())
-//            myLabel.text = String(describing: loc.convertSphericalToCartesian())
+//        if !animotosDict.values.contains("mydesk") {
+//            spawnDesk(withLocation: myDeskLocation, name: "mydesk")
+//        } else if !animotosDict.values.contains("aivensdesk") {
+//            spawnDesk(withLocation: AivensDeskLocation, name: "aivensdesk")
 //        }
+        
+        if !animotosDict.values.contains("coffeetable") {
+            spawnDesk(withLocation: coffeeTabelLocation, name: "coffeetable")
+        }
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -67,17 +58,11 @@ class Scene: SKScene {
 //
 //        if let touchLocation = touches.first?.location(in: sceneView),
 //            let node = nodes(at: touchLocation).first {
-//            node.removeFromParent()
-//
-//            // HACK
-//            if let name = node.name, name == "mydesk" {
-//                animotosDict = [UUID: String]()
+//            if let anchor = sceneView.anchor(for: node) {
+//                animotosDict.removeValue(forKey: anchor.identifier)
 //            }
+//            node.removeFromParent()
 //        }
-    }
-    
-    func updateLocation(withLocation loc: CLLocationCoordinate2D) {
-        currentLoc = loc
     }
 }
 
@@ -100,17 +85,17 @@ private extension Scene {
             print("Name is \(name)")
             
             // Either to the right or left of camera
-            let xDiff = Float(mydeskx - xx) * 100
+            let xDiff = Float(mydeskx - xx) * 1000
             print("x is \(xDiff)")
-            translation.columns.3.x = xDiff
+            //translation.columns.3.x = xDiff
             
             // Either to the top or bottom of camera
-            let yDiff = Float(mydesky - yy) * 100
+            let yDiff = Float(mydesky - yy) * 1000
             print("y is \(yDiff)")
             translation.columns.3.y = yDiff
             
             // Either behind or in front of camera
-            let zDiff = Float(mydeskz - zz) * 100
+            let zDiff = Float(mydeskz - zz) * 1000
             print("z is \(zDiff)")
             translation.columns.3.z = zDiff
             
